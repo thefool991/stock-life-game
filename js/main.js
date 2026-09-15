@@ -60,6 +60,9 @@ SL.main = {
       this._introShown = true;
       SL.ui.M().intro(() => {});
     }
+
+    /* 统计计时起点：新局 / 读档 / 重开三种进入方式都在此汇合，一处覆盖 */
+    SL.stats.start();
   }
 };
 
