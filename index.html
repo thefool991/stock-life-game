@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>股市人生模拟器 Demo v0.5</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!-- 桌面场景：16:9 舞台铺背景图；左侧信息面板浮于背景（半透明），#app 限定在显示器屏幕净区 -->
+<div id="desk-stage">
+
+  <!-- 左侧角色面板（浮于背景图之上，半透明底） -->
+  <div id="side-panel">
+    <aside id="role-panel">
+      <div class="rp-section" id="rp-status">
+        <div class="rp-title">角色状态</div>
+        <div id="rp-avatar" class="rp-avatar"><!-- 立绘占位：assets.img.avatar_normal --></div>
+        <div class="rp-row"><span>心理状态</span><b id="rp-psy">--</b></div>
+        <div class="rp-bar"><i id="rp-psy-bar"></i></div>
+        <div class="rp-row"><span>经验值</span><b id="rp-exp">--</b></div>
+        <div class="rp-bar"><i id="rp-exp-bar"></i></div>
+        <div class="rp-row"><span>运气</span><b id="rp-luck">--</b></div>
+        <div class="rp-bar"><i id="rp-luck-bar"></i></div>
+        <div class="rp-row"><span>行业地位</span><b id="rp-rank">散户</b></div>
+      </div>
+      <div class="rp-section" id="rp-relations">
+        <div class="rp-title">社会关系</div>
+        <div class="rp-row"><span>友情</span><b id="rel-friend">--</b></div>
+        <div class="rp-row"><span>爱情</span><b id="rel-love">--</b></div>
+        <div class="rp-row"><span>亲情</span><b id="rel-family">--</b></div>
+      </div>
+      <div class="rp-section rp-bills" id="rp-bills">
+        <div class="rp-title">每月账单 <span id="bills-total"></span></div>
+        <div id="bills-list"></div>
+      </div>
+    </aside>
+  </div><!-- /#side-panel -->
+
+  <!-- 顶部状态栏（界面顶部居中，总资产突出显示） -->
+  <header id="topbar">
+    <span class="tb-item" id="tb-date">--</span>
+    <span class="tb-item" id="tb-age">--</span>
+    <span class="tb-item tb-total" id="tb-total">总资产 --</span>
+    <span class="tb-item" id="tb-cash">现金 --</span>
+    <span class="tb-item" id="tb-target">目标进度 --</span>
+    <span class="tb-item" id="tb-market">行情中</span>
+    <div class="tb-actions">
+      <button class="tb-btn" id="btn-save" title="手动存档">存档</button>
+      <button class="tb-btn" id="btn-restart" title="重开新局">重开</button>
+    </div>
+  </header>
+
+  <!-- 右侧宏观情报板块（电脑外右上）：世界经济(随机段) + 行业趋势(随机段)；个股新闻=短期不变 -->
+  <aside id="macro-news">
+    <div class="mn-title">宏观情报</div>
+    <div class="mn-sec">
+      <div class="mn-h">世界经济</div>
+      <div class="mn-body" id="mn-world">--</div>
+    </div>
+    <div class="mn-sec">
+      <div class="mn-h"><span><i class="tip-icon" title="每段行业趋势至少维持1个月">?</i>行业趋势</span></div>
+      <div class="mn-body" id="mn-ind">--</div>
+    </div>
+  </aside>
+
+  <!-- 显示器屏幕净区：仅股票列表 / 行情图 / 报价+持仓 / 新闻 / 操作按钮 -->
+  <div id="app">
+  <div id="main">
+    <!-- 行情主区域（文档 §10.2） -->
+    <section id="market-area">
+      <div id="market-body">
+        <!-- 左列：个股列表+行情图（上）、新闻栏（下，右缘对齐分时图） -->
+        <div id="market-left">
+          <div id="market-top">
+            <!-- 个股列表 -->
+            <div id="stock-list"></div>
+
+            <!-- 行情走势图（最宽） -->
+            <div id="chart-area">
+              <div id="chart-head">
+                <span id="chart-stock-name">--</span>
+                <span id="chart-stock-price">--</span>
+                <span id="chart-stock-chg"></span>
+                <span class="ch-spacer"></span>
+                <button class="ch-tab active" id="tab-intraday">分时</button>
+                <button class="ch-tab" id="tab-kline">周K</button>
+              </div>
+              <canvas id="chart-canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- 新闻栏（宽度=个股列表+分时图，右侧留给持仓） -->
+          <div id="news-bar">
+            <div class="news-title">市场资讯</div>
+            <div id="news-list"></div>
+          </div>
+        </div>
+
+        <!-- 右列：报价栏（卖10~买10完整）+ 持仓栏（延伸至交易栏） -->
+        <div id="quote-panel">
+          <div id="quote-book"></div>
+          <div id="position-box">
+            <div class="pos-title">持仓</div>
+            <div id="position-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 交易栏：买卖操作│平仓（v1.5 统一30天周期，周期按钮已移除） -->
+      <div id="trade-bar">
+        <div class="trade-group" id="action-group">
+          <button class="act-btn" data-action="long_third">做多 1/3</button>
+          <button class="act-btn" data-action="short_third">做空 1/3</button>
+          <button class="act-btn" data-action="long_full">全仓做多</button>
+          <button class="act-btn" data-action="short_full">全仓做空</button>
+          <button class="act-btn lev" data-action="long_lev">杠杆做多</button>
+          <button class="act-btn lev" data-action="short_lev">杠杆做空</button>
+        </div>
+        <div class="trade-group" id="misc-group">
+          <button class="misc-btn" id="btn-close-pos">平仓</button>
+          <button class="misc-btn primary" id="btn-next-turn">下一回合 ▸</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 弹窗根节点（确认/结算/事件/结局/爆仓） -->
+  <div id="modal-root"></div>
+  </div><!-- /#app -->
+</div><!-- /#desk-stage -->
+
+<!-- 按依赖顺序加载（经典 script：file:// 双击即玩；微信端打包时顺序一致） -->
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/data/assets.js"></script>
+<script src="js/data/stockData.js"></script>
+<script src="js/data/newsData.js"></script>
+<script src="js/data/macroNewsData.js"></script>
+<script src="js/data/eventData.js"></script>
+<script src="js/core/storage.js"></script>
+<script src="js/core/contentProvider.js"></script>
+<script src="js/core/state.js"></script>
+<script src="js/core/player.js"></script>
+<script src="js/core/market.js"></script>
+<script src="js/core/trade.js"></script>
+<script src="js/core/specialEvents.js"></script>
+<script src="js/core/newsChains.js"></script>
+<script src="js/core/turn.js"></script>
+<script src="js/render/charts.js"></script>
+<script src="js/render/audio.js"></script>
+<script src="js/ui/panels.js"></script>
+<script src="js/ui/modals.js"></script>
+<script src="js/ui/ui.js"></script>
+<script src="js/main.js"></script>
+<script>
+/* v2.1.6：全局UI点击音（鼠标点击声）。capture阶段拦截所有可点击元素，
+ * 音频文件存在时替换原有点击反馈；SL.audio.enabled=false 时静默 */
+document.addEventListener('click', function(e) {
+  if (!window.SL || !SL.audio || !SL.audio.click) return;
+  var t = e.target.closest && e.target.closest('button, .stock-item, .pos-item, .mt-btn, .ev-choice, .rp-row, [data-id], a, .clickable');
+  if (t) SL.audio.click();
+}, true);
+</script>
+</body>
+</html>
