@@ -1,5 +1,8 @@
-# 本地开发截图 / 测试产物
-test/
+# 本地开发截图（体积大 ~13MB，不随仓库分发）
+# 注意：不要写成 test/ ——那样会把 test/smoke.js 冒烟测试一起排除掉
+test/*.png
+test/*.jpg
+test/*.jpeg
 
 # 系统与编辑器
 .DS_Store
