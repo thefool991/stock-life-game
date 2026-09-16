@@ -183,6 +183,13 @@ SL.trade = {
      * 盈利时多赚 ×(1+f)，亏损时少亏 ×(1-f)；封顶、不翻转盈亏符号 */
     const f = SL.player.narrowFactor(G);
     pnl = pnl > 0 ? pnl * (1 + f) : pnl * (1 - f);
+
+    /* v2.1.12 用户确认：杠杆交易结算"只削盈利、不削亏损"——
+     * 盈利(pnl>0)时 ×0.65 削弱（防增长过快），亏损(pnl<0)不削（保留杠杆高风险博弈感）。
+     * 多空双向统一：杠杆做多/做空的盈利都削、亏损都不削（pnl符号已含方向，无需区分dir）。
+     * 在收窄之后、经验/手续费之前生效 */
+    if (p.leverage && pnl > 0) pnl = pnl * cfg.LEVERAGE_PNL_MULT;
+
     value = p.principal + pnl;
 
     /* 经验值：结算增长，盈多亏少（用户确认） */

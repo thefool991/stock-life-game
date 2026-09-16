@@ -1,8 +1,15 @@
 # 本地开发截图（体积大 ~13MB，不随仓库分发）
-# 注意：不要写成 test/ ——那样会把 test/smoke.js 冒烟测试一起排除掉
+# 按扩展名排除，不要写成 test/ ——否则会连下面的脚本一起误伤
 test/*.png
 test/*.jpg
 test/*.jpeg
+
+# 本地临时脚本与冒烟测试（暂不公开，保留在本地）
+test/smoke.js
+
+# 内部设计文档（暂不公开，保留在本地）
+数值公式平衡参考.md
+assets/ASSETS_SPEC.md
 
 # 系统与编辑器
 .DS_Store

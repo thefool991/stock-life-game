@@ -233,6 +233,20 @@ SL.turn = {
     SL.player.updatePsychology(G, pnlRate);
     SL.player.clampAll(G);
 
+    /* v2.2 经验觉醒事件：exp 上穿20的回合弹出（每局一次，永久生效）。
+     * 含扛单扣经验的当回合：净结算后仍≥20 也视为"经验上升中"——
+     * 看4个行业的认知不会因单次回撤消失（与新闻链经验提示同档联动） */
+    let expSightEvent = null;
+    if (!G.indSightAwakened && G.player.exp >= cfg.EXP_VIS_THRESHOLD) {
+      G.indSightAwakened = true;
+      expSightEvent = {
+        id: 'exp_sight_awaken', type: '成长',
+        title: '拨开迷雾',
+        text: '随着经验的上升，你现在对行业轮动把握地更清楚了。',
+        choices: [{ label: '继续盯盘', hint: '行业趋势可见 3 → 4 个', effect: {} }]
+      };
+    }
+
     /* 6. 结局判定（§1.3） */
     const ending = this.checkEnding(G);
     if (ending) { G.ended = true; G.ending = ending; }
@@ -241,7 +255,9 @@ SL.turn = {
      * v2.0.2：一次性事件（once:true，如同居）触发后不再出现 */
     let event = null;
     if (!ending) {
-      if (crossedHoliday) {
+      if (G.deferredEvent) {
+        event = G.deferredEvent; G.deferredEvent = null; // v2.2：上回合被觉醒事件顺延的剧情事件补弹
+      } else if (crossedHoliday) {
         event = SL.content.generateEvent({ G, holiday: true, holidayKey: crossedHoliday.key });
       } else if (rankUpEvent) {
         event = rankUpEvent; // v2.0.2 身份加薪（跨等级线）
@@ -273,6 +289,7 @@ SL.turn = {
       swanEvent: G.swanEvent || null, // v2.0.5 黑天鹅爆发事件（结算后弹窗）
       macroChangeEvent: G.macroChangeEvent || null, // v2.1 宏观切换提示事件
       billsDeducted, salaryPaid, monthsCrossed, overdueExpLoss,
+      expSightEvent, // v2.2：经验突破20的觉醒事件（结算后弹窗）
       crossedHoliday: crossedHoliday || null,
       holidayShock, // v1.6：节后冲击（结算弹窗展示）
       ipoStock: null, // v1.0：IPO 改剧情事件公告（specialEvents），结算弹窗不再单独展示
@@ -314,6 +331,16 @@ SL.turn = {
         s.price = Math.max(0.01, +(s.price * (1 + pct * dir)).toFixed(2));
         s.intraday = SL.market._genIntradayAnchored(s); // v1.6.2：分时锚定
       }
+    } else {
+      /* v2.1.10 用户确认："平稳"≠价格冻结——长假期间正常市场漂移照常发生，
+       * 只是没有额外的±5%/9%冲击。按普通区间引擎补一次长假正常涨跌，
+       * 持仓盈亏结算逻辑与日常一致（原逻辑：休市日continue冻结+平稳dir=0不改价=过节前后一个价） */
+      const holdDays = SL.config.DAYS_PER_MONTH; // 长假=1个月
+      for (const s of SL.state.activeStocks(G)) {
+        const r = SL.market.rollPeriodReturn(G, s, holdDays);
+        s.price = Math.max(0.01, +(s.price * (1 + r)).toFixed(2));
+        s.intraday = SL.market._genIntradayAnchored(s);
+      }
     }
     /* 公告文案（下一回合新闻置顶） */
     const dirLabel = dirKey === 'good' ? '利好' : dirKey === 'bad' ? '利空' : '平稳';
@@ -346,11 +373,14 @@ SL.turn = {
     if (!mn.world || mn.world.cycle !== worldCycle || mn.world.regimeKey !== G.macro) {
       mn.world = { cycle: worldCycle, ...SL.content.generateMacroNews(G, 'world') };
     }
+    /* v2.2：经验可见度档位（<20 见3个 / ≥20 见4个）参与缓存键，
+     * 跨档当回合立即重抽可见行业并重渲染；同档内沿用原轮换节奏 */
+    const visTier = G.player.exp >= cfg.EXP_VIS_THRESHOLD ? 1 : 0;
     const indCycle = Math.floor(m / cfg.MACRO_NEWS_IND_MONTHS);
     /* v1.4：行业段变化（方向/起止）时也立即刷新，不滞后到下个文案周期 */
     const segVer = Object.values(G.indSeg || {}).reduce((s, x) => s + x.startDay * 31 + x.endDay, 0);
-    if (!mn.ind || mn.ind.cycle !== indCycle || mn.ind.segVer !== segVer) {
-      mn.ind = { cycle: indCycle, segVer, items: SL.content.generateMacroNews(G, 'industry') };
+    if (!mn.ind || mn.ind.cycle !== indCycle || mn.ind.segVer !== segVer || mn.ind.visTier !== visTier) {
+      mn.ind = { cycle: indCycle, segVer, visTier, items: SL.content.generateMacroNews(G, 'industry') };
     }
     G.macroNews = mn;
   },

@@ -314,9 +314,12 @@ SL.specialEvents = {
       if (SL.state.totalAsset(G) > cfg.IPO_UNLOCK_ASSET && !G.specialPending) {
         const ind = this._rollIpoIndustry(G);
         if (ind) {
+          /* v2.1.10 用户确认：IPO 预告后需给玩家决策时间（埋伏/观望），再上市。
+           * turnsLeft 强制保底2——预告事件弹出后玩家有1个完整交易回合可操作，
+           * 避免"预告当回合就上市、零决策窗口"（原复用SWAN_PENDING_TURNS[1,2]会随到1） */
           G.specialPending = {
             type: 'ipo', industryKey: ind.key,
-            turnsLeft: u.rangeInt(cfg.SWAN_PENDING_TURNS[0], cfg.SWAN_PENDING_TURNS[1]),
+            turnsLeft: cfg.IPO_PREVIEW_TURNS,
             previewed: false
           };
           G.nextIpoDay = SL.state._rollNextIpoDay(G.day);

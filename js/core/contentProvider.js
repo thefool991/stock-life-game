@@ -79,15 +79,16 @@ window.SL = window.SL || {};
       return u.shuffle(items); // 打乱顺序，增加辨识难度
     },
 
-    /* 宏观情报（v0.8）：kind='world' 按宏观状态出1条；kind='industry' 按各行业景气方向各出1条 */
+    /* industry：对当前在市股票涉及的行业各出一条
+     * v1.0：已移除行业（传媒/金融/银行）的存量存档股不再出现在行业趋势中
+     * v2.2：可见度与经验挂钩——exp<20 每回合随机可见3个行业，exp≥20 可见4个，
+     *       其余行业显示"不明"（行业轮动节奏本身不变，只限制情报可见数量） */
     generateMacroNews(G, kind) {
       const u = U(), cfg = CFG(), pool = SL.data.macroNews;
       if (kind === 'world') {
         const regime = cfg.MACRO[G.macro] || cfg.MACRO.normal;
         return { regimeKey: G.macro, regimeLabel: regime.label, text: u.pick(pool.world[G.macro] || pool.world.normal) };
       }
-      /* industry：对当前在市股票涉及的行业各出一条
-       * v1.0：已移除行业（传媒/金融/银行）的存量存档股不再出现在行业趋势中 */
       const validKeys = new Set(SL.data.stocks.INDUSTRIES.map(i => i.key));
       const seen = {};
       const items = [];
@@ -102,6 +103,10 @@ window.SL = window.SL || {};
           text: u.pick(pool.industry[dir]).replace(/\{industry\}/g, s.industryLabel)
         });
       }
+      /* v2.2：随机选取可见行业（每回合重抽），未选中项标记 unknown */
+      const visN = G.player.exp >= cfg.EXP_VIS_THRESHOLD ? cfg.EXP_VIS_HIGH : cfg.EXP_VIS_LOW;
+      const visKeys = new Set(u.shuffle(items.map(it => it.industryKey)).slice(0, Math.min(visN, items.length)));
+      for (const it of items) if (!visKeys.has(it.industryKey)) { it.unknown = true; it.text = ''; }
       return items;
     },
 
@@ -118,6 +123,9 @@ window.SL = window.SL || {};
           return !e.pack || e.pack === ctx.holidayKey;
         }
         if (e.holiday) return false;
+        /* v2.1.11 用户确认：已开通杠杆后，"两融引导类"剧情事件不再出现
+         * （它们的存在意义是引导开杠杆，开通后再弹无意义且造成"杠杆事件反复弹"的观感） */
+        if (e.leverageGuide && ctx.G.leverageOptedIn) return false;
         if (e.minRank) {
           const need = CFG().RANKS.findIndex(r => r.key === e.minRank);
           return rankIdx >= need;

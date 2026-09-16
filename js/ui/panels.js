@@ -19,7 +19,7 @@ SL.ui.panels = {
     const cashE = this.$('tb-cash');
     cashE.innerHTML = '现金 <span class="v">' + u.fmtMoney(G.cash) + '</span>';
     this.$('tb-target').innerHTML = '目标进度 <span class="v">' +
-      (SL.state.targetProgress(G) * 100).toFixed(1) + '%</span> / 1000万';
+      (SL.state.targetProgress(G) * 100).toFixed(1) + '%</span> / 800万';
     const me = this.$('tb-market');
     const regime = SL.config.MACRO[G.macro] || SL.config.MACRO.normal;
     const inWindow = holiday && u.dayToDate(G.day).day === 1; // v1.6 节前交易窗口
@@ -110,12 +110,17 @@ SL.ui.panels = {
     wEl.innerHTML = '<i class="tip-icon" title="每段经济周期至少持续3个月">?</i>' +
       '<span class="mn-regime ' + regimeCls + '">' + w.regimeLabel + ' · 已持续' + segMonths + '个月</span>' + w.text;
     if (!mn.ind || !mn.ind.items || !mn.ind.items.length) { iEl.textContent = '--'; return; }
+    /* v2.2：经验可见度——未抽中的行业只显示行业名 + "不明"（无方向与文案） */
     iEl.innerHTML = mn.ind.items.map(it =>
-      '<div class="mn-ind-item">' +
-      '<span class="mn-ind-label">' + it.industryLabel + '</span>' +
-      '<span class="mn-ind-dir ' + (it.dir === 'good' ? 'up' : it.dir === 'bad' ? 'down' : 'dim') + '">' +
-      (it.dir === 'good' ? '向好' : it.dir === 'bad' ? '走弱' : '平稳') + '</span>' +
-      '<span class="mn-ind-text">' + it.text + '</span></div>'
+      it.unknown
+        ? '<div class="mn-ind-item">' +
+          '<span class="mn-ind-label">' + it.industryLabel + '</span>' +
+          '<span class="mn-ind-dir dim">不明</span></div>'
+        : '<div class="mn-ind-item">' +
+          '<span class="mn-ind-label">' + it.industryLabel + '</span>' +
+          '<span class="mn-ind-dir ' + (it.dir === 'good' ? 'up' : it.dir === 'bad' ? 'down' : 'dim') + '">' +
+          (it.dir === 'good' ? '向好' : it.dir === 'bad' ? '走弱' : '平稳') + '</span>' +
+          '<span class="mn-ind-text">' + it.text + '</span></div>'
     ).join('');
   },
 

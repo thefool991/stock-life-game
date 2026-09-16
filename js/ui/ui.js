@@ -146,17 +146,31 @@ Object.assign(SL.ui, {
           proceed();
         }
       };
-      /* v2.1：宏观切换提示事件（天鹅事件后、剧情事件前） */
+      /* v2.2：经验觉醒事件（宏观切换事件后、剧情事件前；同回合剧情事件顺延到下一回合） */
+      const showExpSightEvent = () => {
+        if (result.expSightEvent) {
+          if (result.event) G.deferredEvent = result.event; // v2.2：下回合补弹被顺延的剧情事件
+          this.M().event(result.expSightEvent, G, choice => {
+            SL.player.applyEffect(G, choice.effect);
+            SL.storage.save(G);
+            this.renderAll(G);
+            proceed();
+          });
+        } else {
+          showPlotEvent();
+        }
+      };
+      /* v2.1：宏观切换提示事件（天鹅事件后、觉醒事件前） */
       const showMacroEvent = () => {
         if (result.macroChangeEvent) {
           this.M().event(result.macroChangeEvent, G, choice => {
             SL.player.applyEffect(G, choice.effect);
             SL.storage.save(G);
             this.renderAll(G);
-            showPlotEvent();
+            showExpSightEvent();
           });
         } else {
-          showPlotEvent();
+          showExpSightEvent();
         }
       };
       /* v2.0.5：黑天鹅爆发事件（结算后优先弹出，盈亏已含在结算总额里） */

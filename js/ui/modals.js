@@ -68,10 +68,10 @@ SL.ui.modals = {
       '<p>刚过完了生日，转眼已经是27岁</p>' +
       '<p>离家漂泊这些年，没混出什么名堂，棱角却被打磨干净了</p>' +
       '<p>虽说日子还算过得去，兜里也有些积蓄，但还是觉得前路茫茫</p>' +
-      '<p>嘴上说着平淡是真，可午夜梦回，胸中仍有余温</p>' +
+      '<p>嘴上说着平淡是真，可难以入睡的夜晚还是多了起来</p>' +
       '<p>某天瞥见同事花花绿绿的屏幕，他说这叫"投资"</p>' +
-      '<p>怎么开始的你已经忘了，只记得心里开始多了一个目标</p>' +
-      '<p class="intro-goal">8年，1000万</p>' +
+      '<p>怎么开始的你已经忘了，只记得心里开始有了一个目标：</p>' +
+      '<p class="intro-goal">8年，800万</p>' +
       '</div>' +
       '<div class="mt-actions" style="justify-content:center"><button class="mt-btn primary" id="m-ok" style="min-width:140px">开始</button></div>';
     this._show(html);

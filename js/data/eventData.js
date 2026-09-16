@@ -239,7 +239,7 @@ SL.data.events = [
     ]
   },
   {
-    id: 'pro_margin_intro', type: '人脉', weight: 2, minRank: 'pro',
+    id: 'pro_margin_intro', type: '人脉', weight: 2, minRank: 'pro', leverageGuide: true,
     title: '两融业务的推介',
     text: '券商朋友递来一份材料："您的资质可以申请融资融券了，放大收益——当然，也放大风险。要不要先了解下？"',
     choices: [
@@ -276,7 +276,7 @@ SL.data.events = [
    * 中户池（minRank:'middle'，100万解锁）—— 机构圈、私行、杠杆
    * ============================================================ */
   {
-    id: 'mid_privatebank', type: '人脉', weight: 2, minRank: 'middle', special: true,
+    id: 'mid_privatebank', type: '人脉', weight: 2, minRank: 'middle', special: true, leverageGuide: true,
     title: '私行客户经理',
     text: '券商工作人员打来电话，态度恭敬："您已达到我们的资金门槛，有专属理财和两融优惠利率，要不要聊聊？"',
     choices: [
