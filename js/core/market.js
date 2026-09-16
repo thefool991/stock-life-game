@@ -93,19 +93,14 @@ SL.market = {
     return regime;
   },
 
-  /* 宏观切换提示事件（v2.1 用户新增）：进入不同经济状态时的文案 */
+  /* 宏观切换提示事件（v2.3：四种状态文案合并为单一"隐约察觉"版本。
+   * 配合世界经济15%可见机制——玩家多数时候看不到真实状态，切换提示也不再剧透方向，
+   * 只保留"感觉走势不同了"的模糊信号，具体方向留给玩家从行情中自行判断） */
   _mkMacroChangeEvent(regime) {
-    const TEXTS = {
-      bull: '最近市场走势似乎变得强劲起来（宏观经济发生了变化）',
-      normal: '市场成交量已经连续下滑2周了（宏观经济发生了变化）',
-      bear: '情况有些不对啊（宏观经济发生了变化）',
-      crisis: '早上起来刷到股吧"市场崩了！"（宏观经济发生了变化）'
-    };
-    const TITLES = { bull: '📈 进入牛市', normal: '〰️ 进入震荡市', bear: '📉 进入熊市', crisis: '💥 金融危机爆发' };
     return {
-      id: 'macro_change_' + regime, type: '生活', macroChange: true,
-      title: TITLES[regime] || '宏观变化',
-      text: TEXTS[regime] || '宏观经济发生了变化',
+      id: 'macro_change', type: '生活', macroChange: true,
+      title: '宏观经济发生了变化',
+      text: '你隐约感觉到市场的走势和之前不同了',
       choices: [{ label: '记在心上', hint: '经验 +0.2', effect: { exp: 0.2 } }]
     };
   },

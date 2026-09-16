@@ -22,13 +22,17 @@ SL.ui.panels = {
       (SL.state.targetProgress(G) * 100).toFixed(1) + '%</span> / 800万';
     const me = this.$('tb-market');
     const regime = SL.config.MACRO[G.macro] || SL.config.MACRO.normal;
+    /* v2.3：世界经济不可见的回合，顶部不透露真实状态，统一显示"不明确" */
+    const worldHidden = G.macroNews && G.macroNews.worldVisible === false;
+    const regimeText = worldHidden ? '不明确' : regime.label;
     const inWindow = holiday && u.dayToDate(G.day).day === 1; // v1.6 节前交易窗口
     if (G.ended) { me.textContent = '已终局'; me.style.color = '#8b949e'; }
-    else if (inWindow) { me.textContent = holiday.name + '前最后交易日 · ' + regime.label; me.style.color = '#f0a53a'; }
-    else if (holiday) { me.textContent = holiday.name + '休市中 · ' + regime.label; me.style.color = '#f0a53a'; }
+    else if (inWindow) { me.textContent = holiday.name + '前最后交易日 · ' + regimeText; me.style.color = '#f0a53a'; }
+    else if (holiday) { me.textContent = holiday.name + '休市中 · ' + regimeText; me.style.color = '#f0a53a'; }
     else {
-      me.textContent = '交易中 · ' + regime.label;
-      me.style.color = G.macro === 'bull' ? '#e54545' : G.macro === 'normal' ? '#2eb85c' : G.macro === 'bear' ? '#3a9e5f' : '#b03030';
+      me.textContent = '交易中 · ' + regimeText;
+      me.style.color = worldHidden ? '#8b949e'
+        : G.macro === 'bull' ? '#e54545' : G.macro === 'normal' ? '#2eb85c' : G.macro === 'bear' ? '#3a9e5f' : '#b03030';
     }
   },
 
@@ -103,12 +107,18 @@ SL.ui.panels = {
     const wEl = this.$('mn-world'), iEl = this.$('mn-ind');
     if (!wEl || !iEl) return;
     if (!mn || !mn.world) { wEl.textContent = '--'; iEl.textContent = '--'; return; }
-    const w = mn.world;
-    const regimeCls = w.regimeKey === 'bull' ? 'up' : w.regimeKey === 'normal' ? '' : 'down';
-    /* v1.4：显示"已持续X个月"（信息公开度）；v1.4.1：提示集中到"?"图标，悬停弹出 */
-    const segMonths = G.macroSeg ? Math.max(0, Math.floor((G.day - G.macroSeg.startDay) / SL.config.DAYS_PER_MONTH)) : 0;
-    wEl.innerHTML = '<i class="tip-icon" title="每段经济周期至少持续3个月">?</i>' +
-      '<span class="mn-regime ' + regimeCls + '">' + w.regimeLabel + ' · 已持续' + segMonths + '个月</span>' + w.text;
+    /* v2.3：世界经济可见性——仅 15% 回合展示真实状态，其余显示"不明确"（顶部"交易中"同步） */
+    if (mn.worldVisible === false) {
+      wEl.innerHTML = '<span class="mn-regime dim">世界经济 · 不明确</span>' +
+        '<span class="mn-ind-text">当前世界经济走向不明确，难以判断。</span>';
+    } else {
+      const w = mn.world;
+      const regimeCls = w.regimeKey === 'bull' ? 'up' : w.regimeKey === 'normal' ? '' : 'down';
+      /* v1.4：显示"已持续X个月"（信息公开度）；v1.4.1：提示集中到"?"图标，悬停弹出 */
+      const segMonths = G.macroSeg ? Math.max(0, Math.floor((G.day - G.macroSeg.startDay) / SL.config.DAYS_PER_MONTH)) : 0;
+      wEl.innerHTML = '<i class="tip-icon" title="每段经济周期至少持续3个月">?</i>' +
+        '<span class="mn-regime ' + regimeCls + '">' + w.regimeLabel + ' · 已持续' + segMonths + '个月</span>' + w.text;
+    }
     if (!mn.ind || !mn.ind.items || !mn.ind.items.length) { iEl.textContent = '--'; return; }
     /* v2.2：经验可见度——未抽中的行业只显示行业名 + "不明"（无方向与文案） */
     iEl.innerHTML = mn.ind.items.map(it =>

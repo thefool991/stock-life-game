@@ -243,7 +243,7 @@ SL.turn = {
         id: 'exp_sight_awaken', type: '成长',
         title: '拨开迷雾',
         text: '随着经验的上升，你现在对行业轮动把握地更清楚了。',
-        choices: [{ label: '继续盯盘', hint: '行业趋势可见 3 → 4 个', effect: {} }]
+        choices: [{ label: '继续盯盘', hint: '行业趋势可见 2 → 3 个', effect: {} }]
       };
     }
 
@@ -366,9 +366,13 @@ SL.turn = {
    * 世界经济每3个月一轮，但宏观状态中途切换（如危机爆发）时立即更新——不能滞后于决策；
    * 行业趋势每月一轮，反映当月景气方向 */
   _refreshMacroNews(G) {
-    const cfg = SL.config;
+    const cfg = SL.config, u = SL.utils;
     const m = Math.floor(G.day / cfg.DAYS_PER_MONTH);
     const mn = G.macroNews || (G.macroNews = {});
+    /* v2.3：世界经济可见性——每回合独立掷 15% 决定是否向玩家揭示真实状态，
+     * 与 3 个月一换的文案缓存周期相互独立（可见是"本回合视角"，文案是"段内容"）。
+     * 真实宏观状态 G.macro 照常轮动并影响股价，此处仅控制展示。 */
+    mn.worldVisible = u.chance(cfg.WORLD_VIS_RATE);
     const worldCycle = Math.floor(m / cfg.MACRO_NEWS_WORLD_MONTHS);
     if (!mn.world || mn.world.cycle !== worldCycle || mn.world.regimeKey !== G.macro) {
       mn.world = { cycle: worldCycle, ...SL.content.generateMacroNews(G, 'world') };
