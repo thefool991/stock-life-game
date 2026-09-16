@@ -11,6 +11,10 @@ test/smoke.js
 数值公式平衡参考.md
 assets/ASSETS_SPEC.md
 
+# 音频下载残留：D__ 开头的是带本机完整路径的原始副本，
+# 内容与 assets/audio/bgm_main.mp3 完全相同（MD5 一致），且代码从未引用
+assets/audio/D__*.mp3
+
 # 系统与编辑器
 .DS_Store
 Thumbs.db

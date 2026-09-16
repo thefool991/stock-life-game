@@ -33,7 +33,7 @@ SL.assets = {
     avatar_angry:  '',
 
     /* 音乐音效 — 例：'assets/audio/bgm_main.mp3' */
-    bgm_main:      '',
+    bgm_main:      'assets/audio/bgm_main.mp3',   // 背景音乐：肖邦夜曲 Op.9 No.2（CC0），循环播放
     sfx_deal:      '',   // 成交
     sfx_cash:      '',   // 盈利入账（旧键，v2.1.6 起结算用 sfx_profit）
     sfx_liquidate: '',   // 爆仓

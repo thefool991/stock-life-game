@@ -60,6 +60,27 @@ Object.assign(SL.ui, {
 
     /* 窗口尺寸变化重绘图表 */
     window.addEventListener('resize', () => { P.renderChart(G()); });
+
+    /* v2.4：背景音乐喇叭开关（右下角）。阻止冒泡避免触发全局点击音与 BGM 启动监听 */
+    const muteBtn = document.getElementById('btn-mute');
+    if (muteBtn) {
+      muteBtn.addEventListener('pointerdown', e => e.stopPropagation());
+      muteBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        SL.audio.bgm.setMuted(!SL.audio.bgm.isMuted());
+        this.syncMuteBtn();
+      });
+      this.syncMuteBtn();
+    }
+  },
+
+  /* v2.4：同步喇叭图标/静音态样式 */
+  syncMuteBtn() {
+    const b = document.getElementById('btn-mute');
+    if (!b || !SL.audio.bgm) return;
+    const muted = SL.audio.bgm.isMuted();
+    b.textContent = muted ? '🔇' : '🔊';
+    b.classList.toggle('muted', muted);
   },
 
   _tabSync() {

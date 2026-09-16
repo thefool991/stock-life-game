@@ -126,6 +126,10 @@ window.SL = window.SL || {};
         /* v2.1.11 用户确认：已开通杠杆后，"两融引导类"剧情事件不再出现
          * （它们的存在意义是引导开杠杆，开通后再弹无意义且造成"杠杆事件反复弹"的观感） */
         if (e.leverageGuide && ctx.G.leverageOptedIn) return false;
+        /* v2.1.12：已开通杠杆后，"两融账户开通资格"事件也应从随机池剔除。
+         * 此前该事件只走 turn.js 的强制注入路径（有 leverageOptedIn 拦截），
+         * 但随机抽取路径未过滤，weight:99 导致开通后仍大概率反复弹出 */
+        if (e.id === 'mid_leverage_unlock' && ctx.G.leverageOptedIn) return false;
         if (e.minRank) {
           const need = CFG().RANKS.findIndex(r => r.key === e.minRank);
           return rankIdx >= need;

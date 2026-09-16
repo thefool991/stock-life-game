@@ -66,4 +66,9 @@ SL.main = {
   }
 };
 
-window.addEventListener('DOMContentLoaded', () => { SL.desk.init(); SL.main.boot(false); });
+window.addEventListener('DOMContentLoaded', () => {
+  SL.desk.init();
+  /* v2.4：初始化背景音乐（挂首次交互自动启动监听，循环播放） */
+  if (SL.audio && SL.audio.bgm) SL.audio.bgm.init();
+  SL.main.boot(false);
+});

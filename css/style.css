@@ -89,6 +89,35 @@ body {
 }
 .tb-btn:hover { border-color: var(--accent); }
 
+/* ---------- 右下角：背景音乐开关 + 免责声明（v2.4；em 尺寸随舞台等比缩放） ---------- */
+.corner-mute {
+  position: absolute;
+  right: 1.5%; bottom: 3.2%;
+  z-index: 6;
+  width: 2.5em; height: 2.5em;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2em; line-height: 1;
+  background: rgba(13, 17, 23, 0.72); color: var(--text);
+  border: 1px solid rgba(42, 49, 57, 0.8); border-radius: 6px;
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.corner-mute:hover { border-color: var(--accent); }
+.corner-mute.muted { color: var(--text-dim); }
+.corner-disclaimer {
+  position: absolute;
+  right: calc(1.5% + 5.0em); bottom: 3.2%;  /* 喇叭左侧 */
+  z-index: 6;
+  max-width: 30%;
+  padding: 0.5em 0.9em;
+  font-size: 1.2em; font-weight: bold; line-height: 1.6; text-align: right;
+  color: var(--text-dim);
+  background: rgba(13, 17, 23, 0.72);
+  border: 1px solid rgba(42, 49, 57, 0.8); border-radius: 6px;
+  backdrop-filter: blur(4px);
+}
+
 /* ---------- 宏观情报板块（电脑外右侧偏上，半透明底；v1.0 加宽加大） ---------- */
 #macro-news {
   position: absolute;
